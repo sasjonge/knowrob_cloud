@@ -1,38 +1,38 @@
-:- module(openease_editor,
-	[ ease_unload_user_package/1,
-	  ease_load_user_package/1,
-	  ease_unload_directory/1,
-	  ease_load_directory/1,
-	  ease_unload_file/1,
-	  ease_consult/1,
-	  ease_consult_string(+,t),
-	  ease_retract(+)
+:- module(opencloud_editor,
+	[ cloud_unload_user_package/1,
+	  cloud_load_user_package/1,
+	  cloud_unload_directory/1,
+	  cloud_load_directory/1,
+	  cloud_unload_file/1,
+	  cloud_consult/1,
+	  cloud_consult_string(+,t),
+	  cloud_retract(+)
 	]).
 
-:- dynamic ease_user_term/2.
+:- dynamic cloud_user_term/2.
 
 is_prolog_source_file(_File) :- true.
 
 %%
 % Retract all PL files in a ROS package.
 %
-ease_unload_user_package(PkgName) :-
+cloud_unload_user_package(PkgName) :-
   ros_package_path(PkgName,PkgPath),
   atom_concat(PkgPath,'/prolog',PrologDir),
-  ease_unload_directory(PrologDir).
+  cloud_unload_directory(PrologDir).
 
 %%
 % Consult all PL files in a ROS package.
 %
-ease_load_user_package(PkgName) :-
+cloud_load_user_package(PkgName) :-
 	ros_package_path(PkgName,PkgPath),
 	atom_concat(PkgPath,'/prolog',PrologDir),
-	ease_load_directory(PrologDir).
+	cloud_load_directory(PrologDir).
 
 %%
 % Retract all PL files in a directory.
 %
-ease_unload_directory(Directory) :-
+cloud_unload_directory(Directory) :-
 	directory_files(Directory, Entries),
 	forall(
 		(	member(File,Entries),
@@ -40,13 +40,13 @@ ease_unload_directory(Directory) :-
 			exists_file(FilePath),
 			is_prolog_source_file(FilePath)
 		),
-		ease_unload_file(FilePath)
+		cloud_unload_file(FilePath)
 	).
 
 %%
 % Consult all PL files in a directory.
 %
-ease_load_directory(Directory) :-
+cloud_load_directory(Directory) :-
 	directory_files(Directory, Entries),
 	forall(
 		(	member(File,Entries),
@@ -54,30 +54,30 @@ ease_load_directory(Directory) :-
 			exists_file(FilePath),
 			is_prolog_source_file(FilePath)
 		),
-		ease_consult(FilePath)
+		cloud_consult(FilePath)
 	).
 
 %%
 % Retract a previously consulted file.
 %
-ease_unload_file(File) :-
+cloud_unload_file(File) :-
 	write('Un-Consult file '), writeln(File),
 	forall(
-		ease_user_term(File,Term),
-		ease_retract_term(Term)
+		cloud_user_term(File,Term),
+		cloud_retract_term(Term)
 	),
-	retractall(ease_user_term(File,_)).
+	retractall(cloud_user_term(File,_)).
 
-ease_retract_term(X :- _) :-
+cloud_retract_term(X :- _) :-
 	retractall(user:X), !.
-ease_retract_term(X) :-
+cloud_retract_term(X) :-
 	retractall(user:X).
 
 %%
 % Load a PL file into KnowRob.
 %
-ease_consult(File) :-
-	ease_retract(File),
+cloud_consult(File) :-
+	cloud_retract(File),
 	write('Consult file '), writeln(File),
 	open(File, read, Fd),
 	read(Fd, First),
@@ -86,8 +86,8 @@ ease_consult(File) :-
 
 %%
 %
-ease_consult_string(ID, GoalStr) :-
-	ease_retract(ID),
+cloud_consult_string(ID, GoalStr) :-
+	cloud_retract(ID),
 	open_string(GoalStr,Fd),
 	read(Fd, First),
 	read_data(ID, First, Fd),
@@ -95,12 +95,12 @@ ease_consult_string(ID, GoalStr) :-
 
 %%
 %
-ease_retract(ID) :-
+cloud_retract(ID) :-
 	forall(
-		ease_user_term(ID,Expanded),
-		ease_retract_term(Expanded)
+		cloud_user_term(ID,Expanded),
+		cloud_retract_term(Expanded)
 	),
-	retractall(ease_user_term(ID,_)).
+	retractall(cloud_user_term(ID,_)).
 
 %%
 % call assertz for terms in a file
@@ -109,7 +109,7 @@ read_data(_, end_of_file, _) :- !.
 read_data(ID, Term, Fd) :-
 	expand_term(Term,Expanded),
 	assertz(:(user,Expanded)),
-	assertz(ease_user_term(ID,Expanded)),
+	assertz(cloud_user_term(ID,Expanded)),
 	read(Fd, Next),
 	read_data(ID, Next, Fd).
 
